@@ -71,6 +71,18 @@
         .card .info { font-size: 12px; color: #8B949E; margin-top: 5px; word-break: break-all; }
         .card .amount { color: var(--accent); font-weight: bold; }
 
+        /* Style pou Imaj Prèv yo */
+        .prev-img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 10px;
+            background: #000;
+            border: 1px solid #30363D;
+            cursor: pointer;
+        }
+
         .chat-input { 
             position: fixed; 
             bottom: 0; 
@@ -133,7 +145,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // DONE SA YO SOTI NAN GOOGLE-SERVICES.JSON OU AN
         const firebaseConfig = {
             apiKey: "AIzaSyCHVG_0BCd0V_lFSmg3_2qyC5rKclG-b0M",
             authDomain: "prime-gaming-ht.firebaseapp.com",
@@ -175,12 +186,19 @@
                         kontni = `<span ${styleAdmin}>${data.username || 'Inonim'}:</span> ${data.message || ''}`;
                     } else if(non === "Users") {
                         kontni = `<b>👤 ${data.username || 'Utilisatè'}</b>Balans: <span class="amount">${data.balance || 0} HTG</span><div class="info">UID: ${child.key}</div>`;
+                    } else if(non === "Prèv Match") {
+                        // Lojik pou detekte imaj la
+                        let imgHtml = "";
+                        if (data.image_url || data.screenshot || data.url) {
+                            const link = data.image_url || data.screenshot || data.url;
+                            imgHtml = `<img src="${link}" class="prev-img" onclick="window.open('${link}', '_blank')">`;
+                        }
+                        kontni = `<b>📸 Rezilta Match</b>Utilisatè: ${data.username || 'N/A'}<br>Match: ${data.match_id || 'N/A'}${imgHtml}<div class="info">ID: ${child.key}</div>`;
                     } else if(non === "Depo") {
                         kontni = `<b>💵 Demann Depo</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount">${data.amount || 0} HTG</span><div class="info">ID: ${child.key}</div>`;
                     } else if(non === "Retrè") {
                         kontni = `<b>💸 Demann Retrè</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount" style="color:#EF4444">${data.amount || 0} HTG</span><div class="info">ID: ${child.key}</div>`;
                     } else {
-                        // Pou lòt yo (Prèv match, elatriye)
                         kontni = `<b>ID: ${child.key}</b><div class="info">${typeof data === 'object' ? JSON.stringify(data) : data}</div>`;
                     }
 
