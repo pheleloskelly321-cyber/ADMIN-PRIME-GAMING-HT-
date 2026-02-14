@@ -12,6 +12,7 @@
             --accent: #10B981;
             --text: #F9FAFB;
             --danger: #EF4444;
+            --modal-bg: rgba(0, 0, 0, 0.9);
         }
 
         body { 
@@ -87,9 +88,43 @@
         .prev-img {
             width: 100%;
             display: block;
-            max-height: 450px;
-            object-fit: contain;
-            cursor: zoom-in;
+            max-height: 200px; /* Ti rale pou lis la */
+            object-fit: cover;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .prev-img:hover { opacity: 0.8; }
+
+        /* MODAL STYLE (POPUP) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-bg);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .chat-input { 
@@ -144,6 +179,11 @@
         <div style="text-align:center; margin-top: 50px; color: #8B949E;">Chwazi yon kategori pou kòmanse...</div>
     </div>
 
+    <div id="myModal" class="modal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="imgFull">
+    </div>
+
     <div id="chat-box" class="chat-input">
         <div class="chat-container">
             <input type="text" id="msg" placeholder="Mesaj piblik...">
@@ -168,6 +208,16 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Fonksyon pou louvri pop-up imaj
+        window.openModal = function(src) {
+            document.getElementById("myModal").style.display = "flex";
+            document.getElementById("imgFull").src = src;
+        }
+
+        window.closeModal = function() {
+            document.getElementById("myModal").style.display = "none";
+        }
+
         window.chajKategori = function(path, non, btn) {
             document.querySelectorAll('.nav-categories button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -191,26 +241,29 @@
                     const data = child.val();
                     let kontni = "";
                     
+                    // Lojik pou jwenn imaj nan Depo oswa Prèv Match
+                    const img = data.proof_img || data.image_url || data.screenshot;
+                    const imgHtml = img ? `<div class="prev-img-container"><img src="${img}" class="prev-img" onclick="openModal('${img}')"></div>` : "";
+
                     if(non === "Prèv Match") {
-                        // NOU ITILIZE 'proof_img' JAN SA YE NAN FIREBASE OU AN
-                        const img = data.proof_img || data.image_url || data.screenshot;
-                        const imgHtml = img ? `<div class="prev-img-container"><img src="${img}" class="prev-img" onclick="window.open('${img}', '_blank')"></div>` : `<div style="color:gray; padding:10px;">Pa gen foto</div>`;
-                        
                         kontni = `<b>📸 Rezilta Match</b>
-                                  Itilizatè: ${data.username || 'Kelly'}<br>
+                                  Itilizatè: ${data.username || 'N/A'}<br>
                                   Match: ${data.match_id || 'N/A'}<br>
                                   Status: <span style="color:#FACC15">${data.status || 'pending'}</span>
                                   ${imgHtml}`;
-                    } else if(non === "Users") {
-                        kontni = `<b>👤 ${data.username || 'Itilizatè'}</b>Balans: <span class="amount">${data.balance || 0} HTG</span><div class="info">Email: ${data.email || 'N/A'}</div>`;
                     } else if(non === "Depo") {
-                        kontni = `<b>💵 Demann Depo</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount">${data.amount || 0} HTG</span>`;
+                        kontni = `<b>💵 Demann Depo</b>
+                                  Itilizatè: ${data.username || 'N/A'}<br>
+                                  Montan: <span class="amount">${data.amount || 0} HTG</span><br>
+                                  Trans: ${data.transaction_id || 'N/A'}
+                                  ${imgHtml}`;
+                    } else if(non === "Users") {
+                        kontni = `<b>👤 ${data.username || 'Itilizatè'}</b>Balans: <span class="amount">${data.balance || 0} HTG</span><div class="info">UID: ${data.user_id || child.key}</div>`;
                     } else if(non === "Retrè") {
-                        kontni = `<b>💸 Demann Retrè</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount" style="color:var(--danger)">${data.amount || 0} HTG</span>`;
+                        kontni = `<b>💸 Demann Retrè</b>Itilizatè: ${data.username || 'N/A'}<br>Montan: <span class="amount" style="color:var(--danger)">${data.amount || 0} HTG</span>`;
                     } else if(non === "Chat") {
                         kontni = `<b style="color:#FACC15">${data.username}:</b> ${data.message}`;
                     } else {
-                        // Pou tout lòt kategori yo, nou montre tout sa k anndan yo otomatikman
                         let detay = "";
                         for (let key in data) {
                             detay += `<div><b>${key}:</b> ${data[key]}</div>`;
@@ -218,7 +271,7 @@
                         kontni = `<b>ID: ${child.key}</b><div class="info">${detay}</div>`;
                     }
 
-                    area.innerHTML += `<div class="card">${kontni}<div class="info">ID: ${child.key}</div></div>`;
+                    area.innerHTML += `<div class="card">${kontni}<div class="info">Ref: ${child.key}</div></div>`;
                 });
             }, (error) => {
                 area.innerHTML = `<div style="color:var(--danger); padding:20px;">Erè: ${error.message}</div>`;
