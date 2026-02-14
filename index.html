@@ -16,28 +16,25 @@
         body { 
             background: var(--bg); 
             color: var(--text); 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
             margin: 0; 
-            padding-bottom: 80px; /* Pou espas chat la */
+            padding-bottom: 80px;
         }
 
-        /* UI Header */
         .header { 
             padding: 25px; 
             text-align: center; 
-            background: linear-gradient(180deg, #111827 0%, #0B0E14 100%);
+            background: #111827;
             border-bottom: 2px solid var(--primary);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         
-        .header h1 { margin: 0; font-size: 22px; letter-spacing: 2px; color: var(--primary); }
+        .header h1 { margin: 0; font-size: 20px; color: var(--primary); text-transform: uppercase; }
 
-        /* Navigation bèl */
         .nav-categories { 
             display: flex; 
             overflow-x: auto; 
             padding: 15px; 
-            gap: 12px; 
+            gap: 10px; 
             background: #111827;
             position: sticky;
             top: 0;
@@ -50,38 +47,30 @@
             background: var(--card-bg); 
             border: 1px solid #30363D; 
             color: #8B949E; 
-            padding: 12px 24px; 
-            border-radius: 12px; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
             cursor: pointer; 
             white-space: nowrap;
-            transition: 0.3s;
             font-weight: 600;
         }
 
-        .nav-categories button:hover { border-color: var(--primary); color: white; }
-        .nav-categories button.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+        .nav-categories button.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Display Area */
-        #display-area { padding: 20px; max-width: 800px; margin: auto; }
-        .category-title { color: var(--primary); margin-bottom: 20px; font-size: 18px; border-left: 4px solid var(--primary); padding-left: 10px; }
+        #display-area { padding: 20px; max-width: 600px; margin: auto; }
+        .category-title { color: var(--primary); margin-bottom: 15px; font-weight: bold; }
 
-        /* Cards Style Pro */
         .card { 
             background: var(--card-bg); 
-            padding: 18px; 
-            margin-bottom: 15px; 
-            border-radius: 15px; 
+            padding: 15px; 
+            margin-bottom: 12px; 
+            border-radius: 10px; 
             border: 1px solid #30363D;
-            animation: fadeIn 0.4s ease;
         }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .card b { color: var(--primary); display: block; margin-bottom: 5px; }
-        .card .info { font-size: 13px; color: #8B949E; margin-top: 8px; font-family: monospace; }
-        .card .amount { color: var(--accent); font-weight: bold; font-size: 16px; }
+        .card .info { font-size: 12px; color: #8B949E; margin-top: 5px; word-break: break-all; }
+        .card .amount { color: var(--accent); font-weight: bold; }
 
-        /* Chat Input Style */
         .chat-input { 
             position: fixed; 
             bottom: 0; 
@@ -91,31 +80,27 @@
             display: none; 
             box-sizing: border-box;
             border-top: 1px solid var(--primary);
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.4);
         }
 
-        .chat-container { display: flex; gap: 10px; max-width: 800px; margin: auto; }
+        .chat-container { display: flex; gap: 10px; }
 
         input { 
             background: #0D1117; 
             border: 1px solid #30363D; 
             color: white; 
-            padding: 12px; 
-            border-radius: 10px;
+            padding: 10px; 
+            border-radius: 5px;
             flex-grow: 1;
             outline: none;
         }
-        
-        input:focus { border-color: var(--primary); }
 
         .btn-send { 
             background: var(--primary); 
             border: none; 
             color: white; 
-            padding: 0 20px; 
-            border-radius: 10px; 
+            padding: 0 15px; 
+            border-radius: 5px; 
             cursor: pointer;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -148,30 +133,36 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // DONE SA YO SOTI NAN GOOGLE-SERVICES.JSON OU AN
         const firebaseConfig = {
-            // METE DONE PAW YO LA
+            apiKey: "AIzaSyCHVG_0BCd0V_lFSmg3_2qyC5rKclG-b0M",
+            authDomain: "prime-gaming-ht.firebaseapp.com",
             databaseURL: "https://prime-gaming-ht-default-rtdb.firebaseio.com",
+            projectId: "prime-gaming-ht",
+            storageBucket: "prime-gaming-ht.firebasestorage.app",
+            messagingSenderId: "579566074161",
+            appId: "1:579566074161:android:e50abea764dd4d37371810"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         window.chajKategori = function(path, non, btn) {
-            // Aktive koulè bouton
             document.querySelectorAll('.nav-categories button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
             const area = document.getElementById('display-area');
             const chatBox = document.getElementById('chat-box');
-            
             chatBox.style.display = (non === 'Chat') ? 'block' : 'none';
             
+            area.innerHTML = `<div class="category-title">Kategori: ${non}...</div>`;
+
             const dbRef = ref(db, path);
             onValue(dbRef, (snapshot) => {
                 area.innerHTML = `<div class="category-title">Kategori: ${non}</div>`;
                 
                 if (!snapshot.exists()) {
-                    area.innerHTML += `<div style="text-align:center; padding:20px; color:#8B949E;">Pa gen done nan seksyon sa a.</div>`;
+                    area.innerHTML += `<div style="text-align:center; padding:20px; color:#8B949E;">Pa gen done pou kounye a.</div>`;
                     return;
                 }
 
@@ -181,19 +172,22 @@
                     
                     if(non === "Chat") {
                         const styleAdmin = data.username === "PRIME GAMING HT" ? "style='color:#FACC15; font-weight:bold;'" : "";
-                        kontni = `<span ${styleAdmin}>${data.username}:</span> ${data.message}`;
+                        kontni = `<span ${styleAdmin}>${data.username || 'Inonim'}:</span> ${data.message || ''}`;
                     } else if(non === "Users") {
-                        kontni = `<b>👤 ${data.username || 'Inonim'}</b><span class="amount">💰 ${data.balance || 0} HTG</span><div class="info">ID: ${child.key}</div>`;
+                        kontni = `<b>👤 ${data.username || 'Utilisatè'}</b>Balans: <span class="amount">${data.balance || 0} HTG</span><div class="info">UID: ${child.key}</div>`;
                     } else if(non === "Depo") {
-                        kontni = `<b>💵 Nouvo Depo</b>Utilisatè: ${data.username}<br><span class="amount">+ ${data.amount} HTG</span><div class="info">Trans: ${data.transaction_id || child.key}</div>`;
+                        kontni = `<b>💵 Demann Depo</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount">${data.amount || 0} HTG</span><div class="info">ID: ${child.key}</div>`;
                     } else if(non === "Retrè") {
-                        kontni = `<b>💸 Demann Retrè</b>Utilisatè: ${data.username}<br><span class="amount" style="color:#EF4444">- ${data.amount} HTG</span><div class="info">Metòd: ${data.method || 'N/A'}</div>`;
+                        kontni = `<b>💸 Demann Retrè</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount" style="color:#EF4444">${data.amount || 0} HTG</span><div class="info">ID: ${child.key}</div>`;
                     } else {
-                        kontni = `<b>Aktivite: ${child.key}</b><div class="info">${JSON.stringify(data)}</div>`;
+                        // Pou lòt yo (Prèv match, elatriye)
+                        kontni = `<b>ID: ${child.key}</b><div class="info">${typeof data === 'object' ? JSON.stringify(data) : data}</div>`;
                     }
 
                     area.innerHTML += `<div class="card">${kontni}</div>`;
                 });
+            }, (error) => {
+                area.innerHTML = `<div style="color:red; padding:20px;">Erè: ${error.message}</div>`;
             });
         }
 
