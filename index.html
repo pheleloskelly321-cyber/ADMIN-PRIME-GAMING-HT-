@@ -113,6 +113,7 @@
 
         .btn-update { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
         .btn-ban { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-unban { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
 
         .prev-img-container {
             width: 100%;
@@ -121,7 +122,6 @@
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid #30363D;
-            max-height: 300px;
         }
 
         .prev-img {
@@ -204,19 +204,29 @@
         window.openModal = (src) => { document.getElementById("myModal").style.display = "flex"; document.getElementById("imgFull").src = src; }
         window.closeModal = () => { document.getElementById("myModal").style.display = "none"; }
 
+        // FIX: Mizajou balans lan asire li tounen chif
         window.updateBalance = function(uid) {
-            const nouvoBalans = document.getElementById(`bal-${uid}`).value;
-            if (!nouvoBalans || isNaN(nouvoBalans)) return alert("Mete yon chif valab");
+            const inputBal = document.getElementById(`bal-${uid}`);
+            const nouvoBalans = inputBal.value;
+            if (nouvoBalans === "" || isNaN(nouvoBalans)) return alert("Mete yon chif valab");
+            
             update(ref(db, `users/${uid}`), { balance: Number(nouvoBalans) })
-            .then(() => alert("Balans lan chanje!"));
+            .then(() => {
+                alert("Balans lan chanje!");
+                inputBal.value = ""; // Netwaye input la
+            })
+            .catch(err => alert("Erè: " + err.message));
         }
 
-        window.banUser = function(uid, currentRole) {
-            const isBanned = currentRole === 'banned';
-            const newRole = isBanned ? 'player' : 'banned';
-            if(confirm(isBanned ? "Debloke jwè sa?" : "Vle bloke (Ban) jwè sa?")) {
+        // FIX: Fonksyon Ban korije pou l chanje otomatikman nan UI a
+        window.banUser = function(uid, isCurrentlyBanned) {
+            const newRole = isCurrentlyBanned ? 'player' : 'banned';
+            const konfimasyon = isCurrentlyBanned ? "Debloke jwè sa?" : "Bloke (Ban) jwè sa?";
+            
+            if(confirm(konfimasyon)) {
                 update(ref(db, `users/${uid}`), { role: newRole })
-                .then(() => alert("Operasyon reyisi!"));
+                .then(() => alert("Estati a chanje ak siksè!"))
+                .catch(err => alert("Erè: " + err.message));
             }
         }
 
@@ -234,15 +244,16 @@
             onValue(currentRef, (snapshot) => {
                 area.innerHTML = `<div class="category-title">Kategori: ${non}</div>`;
                 if (!snapshot.exists()) {
-                    area.innerHTML += `<div style="text-align:center; padding:20px; color:#8B949E;">Pa gen done nan seksyon sa.</div>`;
+                    area.innerHTML += `<div style="text-align:center; padding:20px; color:#8B949E;">Pa gen done.</div>`;
                     return;
                 }
 
                 snapshot.forEach((child) => {
                     const data = child.val();
+                    const key = child.key;
                     let kontni = "";
                     
-                    // Jwenn Imaj: Tcheke proof_img (Depo), screenshot (Match), photoUrl (Jwè)
+                    // Jwenn imaj yo (si se base64 oswa URL)
                     const imgUrl = data.proof_img || data.screenshot || data.photoUrl || data.image_url;
                     const imgHtml = imgUrl ? `<div class="prev-img-container"><img src="${imgUrl}" class="prev-img" onclick="openModal('${imgUrl}')"></div>` : "";
 
@@ -253,7 +264,7 @@
                         kontni = `
                             <div class="user-header">
                                 <img src="${userPhoto}" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                                <b style="${isBanned ? 'color:var(--danger)' : ''}">${data.username || 'N/A'} ${isBanned ? '🚫' : ''}</b>
+                                <b style="${isBanned ? 'color:var(--danger)' : ''}">${data.username || 'N/A'} ${isBanned ? '(BANNED 🚫)' : ''}</b>
                             </div>
                             <div class="info">
                                 📧 ${data.email || 'Pa gen email'}<br>
@@ -263,9 +274,11 @@
                                 💰 Balans: <span class="amount">${data.balance || 0} HTG</span>
                             </div>
                             <div class="update-box">
-                                <input type="number" id="bal-${child.key}" placeholder="Balans">
-                                <button class="btn-update" onclick="updateBalance('${child.key}')">OK</button>
-                                <button class="btn-ban" onclick="banUser('${child.key}', '${data.role}')">${isBanned ? 'Unban' : 'Ban'}</button>
+                                <input type="number" id="bal-${key}" placeholder="Nouvo balans">
+                                <button class="btn-update" onclick="updateBalance('${key}')">OK</button>
+                                <button class="${isBanned ? 'btn-unban' : 'btn-ban'}" onclick="banUser('${key}', ${isBanned})">
+                                    ${isBanned ? 'Unban' : 'Ban'}
+                                </button>
                             </div>
                         `;
                     } else if(non === "Prèv Match") {
@@ -279,13 +292,10 @@
                     } else {
                         kontni = `<div class="info">Done: ${JSON.stringify(data)}</div>`;
                     }
-                    area.innerHTML += `<div class="card">${kontni}<div class="info" style="font-size:9px; opacity:0.4; margin-top:8px;">REF: ${child.key}</div></div>`;
+                    area.innerHTML += `<div class="card">${kontni}<div class="info" style="font-size:9px; opacity:0.4; margin-top:8px;">REF: ${key}</div></div>`;
                 });
             }, (error) => {
-                area.innerHTML = `<div style="color:var(--danger); padding:20px; text-align:center;">
-                    <b>Erè Sekirite Firebase:</b><br>${error.message}<br>
-                    <small>Verifye "Rules" nan console Firebase ou a.</small>
-                </div>`;
+                area.innerHTML = `<div style="color:var(--danger); padding:20px; text-align:center;">Erè Firebase: ${error.message}</div>`;
             });
         }
 
