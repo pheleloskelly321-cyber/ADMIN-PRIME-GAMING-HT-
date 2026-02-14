@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prisme - Admin Control</title>
+    <title>Prime Gaming HT - Admin</title>
     <style>
         :root {
             --bg: #0B0E14;
@@ -12,19 +12,19 @@
             --accent: #10B981;
             --text: #F9FAFB;
             --danger: #EF4444;
-            --modal-bg: rgba(0, 0, 0, 0.95);
+            --modal-bg: rgba(0, 0, 0, 0.9);
         }
 
         body { 
             background: var(--bg); 
             color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
             margin: 0; 
             padding-bottom: 80px;
         }
 
         .header { 
-            padding: 15px; 
+            padding: 20px; 
             text-align: center; 
             background: #111827;
             border-bottom: 2px solid var(--primary);
@@ -32,16 +32,19 @@
             top: 0;
             z-index: 1000;
         }
+        
+        .header h1 { margin: 0; font-size: 18px; color: var(--primary); letter-spacing: 1px; }
 
         .nav-categories { 
             display: flex; 
             overflow-x: auto; 
-            padding: 10px; 
+            padding: 12px; 
             gap: 8px; 
             background: #0B0E14;
             border-bottom: 1px solid #30363D;
-            scrollbar-width: none;
         }
+
+        .nav-categories::-webkit-scrollbar { display: none; }
 
         .nav-categories button { 
             background: var(--card-bg); 
@@ -52,23 +55,30 @@
             cursor: pointer; 
             white-space: nowrap;
             font-weight: 600;
+            font-size: 13px;
         }
 
         .nav-categories button.active { background: var(--primary); color: white; border-color: var(--primary); }
 
         #display-area { padding: 15px; max-width: 500px; margin: auto; }
+        .category-title { color: var(--primary); margin-bottom: 12px; font-weight: bold; font-size: 14px; text-transform: uppercase; }
 
         .card { 
             background: var(--card-bg); 
             padding: 15px; 
-            margin-bottom: 15px; 
+            margin-bottom: 12px; 
             border-radius: 12px; 
             border: 1px solid #30363D;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
-        .user-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-        
-        /* Styl pou foto pwofil ak prèv match */
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
         .profile-pic {
             width: 50px;
             height: 50px;
@@ -78,162 +88,213 @@
             background: #21262d;
         }
 
-        .img-preview {
-            width: 100%;
-            max-height: 300px;
-            margin-top: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            object-fit: contain;
-            background: #000;
-            display: block; /* Asire li pran plas li */
-        }
+        .card b { color: var(--primary); margin: 0; font-size: 16px; }
+        .card .info { font-size: 13px; color: #8B949E; margin-top: 5px; line-height: 1.6; }
+        .card .amount { color: var(--accent); font-weight: bold; font-size: 16px; }
 
-        .info { font-size: 13px; color: #8B949E; line-height: 1.6; }
-        .amount { color: var(--accent); font-weight: bold; }
-
-        .controls {
+        .update-box {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             margin-top: 12px;
-            padding-top: 10px;
+            padding-top: 12px;
             border-top: 1px solid #30363D;
         }
 
-        input {
+        .update-box input {
+            width: 100px;
+            padding: 8px;
+            font-size: 13px;
             background: #0D1117;
             border: 1px solid #30363D;
             color: white;
-            padding: 6px;
-            border-radius: 4px;
-            width: 80px;
+            border-radius: 6px;
         }
 
-        .btn { border: none; padding: 7px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .btn-update { background: var(--accent); color: white; }
-        .btn-ban { background: var(--danger); color: white; }
+        .btn-update { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-ban { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
 
-        /* Modal pou wè imaj la an gwo */
+        .prev-img-container {
+            width: 100%;
+            margin-top: 12px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #30363D;
+            max-height: 300px;
+        }
+
+        .prev-img {
+            width: 100%;
+            display: block;
+            max-height: 300px;
+            object-fit: contain;
+            cursor: pointer;
+        }
+
         .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--modal-bg);
-            z-index: 3000;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-bg);
             justify-content: center;
             align-items: center;
         }
-        .modal img { max-width: 95%; max-height: 90%; border-radius: 8px; }
+
+        .modal-content { max-width: 95%; max-height: 85%; border-radius: 8px; }
+        .close-modal { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
+
+        .chat-input { position: fixed; bottom: 0; width: 100%; background: #161B22; padding: 12px; display: none; box-sizing: border-box; border-top: 1px solid var(--primary); }
+        .chat-container { display: flex; gap: 8px; max-width: 500px; margin: auto; }
+        .chat-container input { background: #0D1117; border: 1px solid #30363D; color: white; padding: 10px; border-radius: 8px; flex-grow: 1; outline: none; }
     </style>
 </head>
 <body>
 
     <div class="header"><h1>PRIME GAMING HT - ADMIN</h1></div>
 
-    <div class="nav-categories">
+    <div class="nav-categories" id="navBar">
         <button onclick="chajKategori('admin_requests/deposits', 'Depo', this)">Depo</button>
-        <button onclick="chajKategori('admin_requests/withdrawals', 'Retrè', this)">Retrè</button>
+        <button onclick="chajKategori('admin_requests/withdrawals', 'Retrè', this) ">Retrè</button>
+        <button onclick="chajKategori('challenges', 'Defi Lage', this)">Defi Lage</button>
+        <button onclick="chajKategori('admin_controls/accepted_challenges', 'Defi Asepte', this)">Defi Asepte</button>
         <button onclick="chajKategori('admin_requests/match_results', 'Prèv Match', this)">Prèv Match</button>
         <button onclick="chajKategori('users', 'Users', this)">Users</button>
         <button onclick="chajKategori('chat', 'Chat', this)">Chat</button>
     </div>
 
-    <div id="display-area"></div>
+    <div id="display-area">
+        <div style="text-align:center; margin-top: 50px; color: #8B949E;">Chwazi yon kategori...</div>
+    </div>
 
-    <div id="imgModal" class="modal" onclick="this.style.display='none'">
-        <img id="fullImg">
+    <div id="myModal" class="modal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="imgFull">
+    </div>
+
+    <div id="chat-box" class="chat-input">
+        <div class="chat-container">
+            <input type="text" id="msg" placeholder="Mesaj piblik...">
+            <button class="btn-update" style="background:var(--primary)" onclick="voyeMesaj()">Voye</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, update, serverTimestamp, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCHVG_0BCd0V_lFSmg3_2qyC5rKclG-b0M",
             authDomain: "prime-gaming-ht.firebaseapp.com",
             databaseURL: "https://prime-gaming-ht-default-rtdb.firebaseio.com",
-            projectId: "prime-gaming-ht"
+            projectId: "prime-gaming-ht",
+            storageBucket: "prime-gaming-ht.firebasestorage.app",
+            messagingSenderId: "579566074161",
+            appId: "1:579566074161:android:e50abea764dd4d37371810"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        let currentRef = null;
 
-        window.viewImage = (url) => {
-            document.getElementById('fullImg').src = url;
-            document.getElementById('imgModal').style.display = 'flex';
+        window.openModal = (src) => { document.getElementById("myModal").style.display = "flex"; document.getElementById("imgFull").src = src; }
+        window.closeModal = () => { document.getElementById("myModal").style.display = "none"; }
+
+        window.updateBalance = function(uid) {
+            const nouvoBalans = document.getElementById(`bal-${uid}`).value;
+            if (!nouvoBalans || isNaN(nouvoBalans)) return alert("Mete yon chif valab");
+            update(ref(db, `users/${uid}`), { balance: Number(nouvoBalans) })
+            .then(() => alert("Balans lan chanje!"));
         }
 
-        window.updateBalance = (uid) => {
-            const val = document.getElementById(`input-${uid}`).value;
-            if(!val) return alert("Mete yon valè");
-            update(ref(db, `users/${uid}`), { balance: Number(val) })
-            .then(() => alert("Balans ajou!"));
-        }
-
-        window.toggleBan = (uid, currentRole) => {
-            const newRole = currentRole === 'banned' ? 'player' : 'banned';
-            if(confirm(`Èske w vle ${newRole === 'banned' ? 'BLOKE' : 'DEBLOKE'} jwè sa a?`)) {
-                update(ref(db, `users/${uid}`), { role: newRole });
+        window.banUser = function(uid, currentRole) {
+            const isBanned = currentRole === 'banned';
+            const newRole = isBanned ? 'player' : 'banned';
+            if(confirm(isBanned ? "Debloke jwè sa?" : "Vle bloke (Ban) jwè sa?")) {
+                update(ref(db, `users/${uid}`), { role: newRole })
+                .then(() => alert("Operasyon reyisi!"));
             }
         }
 
-        window.chajKategori = (path, tit, btn) => {
+        window.chajKategori = function(path, non, btn) {
+            if (currentRef) off(currentRef);
+            
             document.querySelectorAll('.nav-categories button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
             const area = document.getElementById('display-area');
-            area.innerHTML = "<p style='text-align:center'>Ap chaje...</p>";
+            document.getElementById('chat-box').style.display = (non === 'Chat') ? 'block' : 'none';
+            area.innerHTML = `<div class="category-title">Kategori: ${non}</div><div style="text-align:center; padding:20px;">Ap chaje...</div>`;
 
-            onValue(ref(db, path), (snapshot) => {
-                area.innerHTML = `<h3 style="color:var(--primary)">${tit}</h3>`;
-                if(!snapshot.exists()) return area.innerHTML += "<p>Pa gen done.</p>";
+            currentRef = ref(db, path);
+            onValue(currentRef, (snapshot) => {
+                area.innerHTML = `<div class="category-title">Kategori: ${non}</div>`;
+                if (!snapshot.exists()) {
+                    area.innerHTML += `<div style="text-align:center; padding:20px; color:#8B949E;">Pa gen done nan seksyon sa.</div>`;
+                    return;
+                }
 
                 snapshot.forEach((child) => {
                     const data = child.val();
-                    const key = child.key;
-                    let html = "";
+                    let kontni = "";
+                    
+                    // Jwenn Imaj: Tcheke proof_img (Depo), screenshot (Match), photoUrl (Jwè)
+                    const imgUrl = data.proof_img || data.screenshot || data.photoUrl || data.image_url;
+                    const imgHtml = imgUrl ? `<div class="prev-img-container"><img src="${imgUrl}" class="prev-img" onclick="openModal('${imgUrl}')"></div>` : "";
 
-                    // Lojik pou jwenn imaj la (kit se proof_img oswa photoUrl)
-                    const imajKòrèk = data.proof_img || data.photoUrl || "";
-                    const displayImaj = imajKòrèk ? `<img src="${imajKòrèk}" class="img-preview" onclick="viewImage('${imajKòrèk}')">` : "";
-
-                    if(tit === "Users") {
+                    if(non === "Users") {
                         const isBanned = data.role === 'banned';
-                        html = `
-                            <div class="card" style="${isBanned ? 'border-color:var(--danger)' : ''}">
-                                <div class="user-header">
-                                    <img src="${data.photoUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="profile-pic">
-                                    <b>${data.username} ${isBanned ? '🚫' : ''}</b>
-                                </div>
-                                <div class="info">
-                                    Email: ${data.email || 'N/A'}<br>
-                                    Tel: ${data.phone || 'N/A'}<br>
-                                    Balans: <span class="amount">${data.balance || 0} HTG</span>
-                                </div>
-                                <div class="controls">
-                                    <input type="number" id="input-${key}" placeholder="Balans">
-                                    <button class="btn btn-update" onclick="updateBalance('${key}')">OK</button>
-                                    <button class="btn btn-ban" onclick="toggleBan('${key}', '${data.role}')">
-                                        ${isBanned ? 'Unban' : 'Ban'}
-                                    </button>
-                                </div>
-                            </div>`;
+                        const userPhoto = data.photoUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                        
+                        kontni = `
+                            <div class="user-header">
+                                <img src="${userPhoto}" class="profile-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                                <b style="${isBanned ? 'color:var(--danger)' : ''}">${data.username || 'N/A'} ${isBanned ? '🚫' : ''}</b>
+                            </div>
+                            <div class="info">
+                                📧 ${data.email || 'Pa gen email'}<br>
+                                📞 ${data.phone || 'N/A'}<br>
+                                🎭 Ròl: ${data.role || 'player'}<br>
+                                🏆 Stats: ${data.stats?.wins || 0} W | ${data.stats?.losses || 0} L<br>
+                                💰 Balans: <span class="amount">${data.balance || 0} HTG</span>
+                            </div>
+                            <div class="update-box">
+                                <input type="number" id="bal-${child.key}" placeholder="Balans">
+                                <button class="btn-update" onclick="updateBalance('${child.key}')">OK</button>
+                                <button class="btn-ban" onclick="banUser('${child.key}', '${data.role}')">${isBanned ? 'Unban' : 'Ban'}</button>
+                            </div>
+                        `;
+                    } else if(non === "Prèv Match") {
+                        kontni = `<b>📸 Rezilta Match</b><br>Jwè: ${data.username}<br>Match ID: ${data.match_id || 'N/A'}${imgHtml}`;
+                    } else if(non === "Depo") {
+                        kontni = `<b>💵 Demann Depo</b><br>Jwè: ${data.username}<br>Montan: <span class="amount">${data.amount} HTG</span><br>ID: ${data.transaction_id || 'N/A'}${imgHtml}`;
+                    } else if(non === "Retrè") {
+                        kontni = `<b>💸 Demann Retrè</b><br>Jwè: ${data.username}<br>Montan: <span class="amount" style="color:var(--danger)">${data.amount} HTG</span>`;
+                    } else if(non === "Chat") {
+                        kontni = `<b style="color:#FACC15">${data.username}:</b> ${data.message}`;
                     } else {
-                        // Pou Depo ak Prèv Match
-                        html = `
-                            <div class="card">
-                                <b>Utilisatè: ${data.username}</b>
-                                <div class="info">
-                                    Status: ${data.status}<br>
-                                    ${data.amount ? `Montan: <span class="amount">${data.amount} HTG</span><br>` : ''}
-                                    ${data.match_id ? `Match: ${data.match_id}` : ''}
-                                </div>
-                                ${displayImaj}
-                            </div>`;
+                        kontni = `<div class="info">Done: ${JSON.stringify(data)}</div>`;
                     }
-                    area.innerHTML += html;
+                    area.innerHTML += `<div class="card">${kontni}<div class="info" style="font-size:9px; opacity:0.4; margin-top:8px;">REF: ${child.key}</div></div>`;
                 });
+            }, (error) => {
+                area.innerHTML = `<div style="color:var(--danger); padding:20px; text-align:center;">
+                    <b>Erè Sekirite Firebase:</b><br>${error.message}<br>
+                    <small>Verifye "Rules" nan console Firebase ou a.</small>
+                </div>`;
             });
+        }
+
+        window.voyeMesaj = function() {
+            const msgInput = document.getElementById('msg');
+            if(msgInput.value.trim() !== "") {
+                push(ref(db, 'chat'), { username: "ADMIN - PRIME", message: msgInput.value, timestamp: serverTimestamp() });
+                msgInput.value = "";
+            }
         }
     </script>
 </body>
