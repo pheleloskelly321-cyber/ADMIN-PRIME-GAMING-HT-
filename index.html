@@ -87,6 +87,15 @@
             border: 2px solid var(--primary);
             background: #21262d;
         }
+        
+        /* Style espesyal pou ti foto nan chat */
+        .chat-pic {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid var(--accent);
+        }
 
         .card b { color: var(--primary); margin: 0; font-size: 16px; }
         .card .info { font-size: 13px; color: #8B949E; margin-top: 5px; line-height: 1.6; }
@@ -178,7 +187,7 @@
 
     <div id="chat-box" class="chat-input">
         <div class="chat-container">
-            <input type="text" id="msg" placeholder="Mesaj piblik...">
+            <input type="text" id="msg" placeholder="Ekri mesaj ou la...">
             <button class="btn-update" style="background:var(--primary)" onclick="voyeMesaj()">Voye</button>
         </div>
     </div>
@@ -204,7 +213,6 @@
         window.openModal = (src) => { document.getElementById("myModal").style.display = "flex"; document.getElementById("imgFull").src = src; }
         window.closeModal = () => { document.getElementById("myModal").style.display = "none"; }
 
-        // FIX: Mizajou balans lan asire li tounen chif
         window.updateBalance = function(uid) {
             const inputBal = document.getElementById(`bal-${uid}`);
             const nouvoBalans = inputBal.value;
@@ -213,12 +221,11 @@
             update(ref(db, `users/${uid}`), { balance: Number(nouvoBalans) })
             .then(() => {
                 alert("Balans lan chanje!");
-                inputBal.value = ""; // Netwaye input la
+                inputBal.value = "";
             })
             .catch(err => alert("Erè: " + err.message));
         }
 
-        // FIX: Fonksyon Ban korije pou l chanje otomatikman nan UI a
         window.banUser = function(uid, isCurrentlyBanned) {
             const newRole = isCurrentlyBanned ? 'player' : 'banned';
             const konfimasyon = isCurrentlyBanned ? "Debloke jwè sa?" : "Bloke (Ban) jwè sa?";
@@ -253,7 +260,6 @@
                     const key = child.key;
                     let kontni = "";
                     
-                    // Jwenn imaj yo (si se base64 oswa URL)
                     const imgUrl = data.proof_img || data.screenshot || data.photoUrl || data.image_url;
                     const imgHtml = imgUrl ? `<div class="prev-img-container"><img src="${imgUrl}" class="prev-img" onclick="openModal('${imgUrl}')"></div>` : "";
 
@@ -288,7 +294,17 @@
                     } else if(non === "Retrè") {
                         kontni = `<b>💸 Demann Retrè</b><br>Jwè: ${data.username}<br>Montan: <span class="amount" style="color:var(--danger)">${data.amount} HTG</span>`;
                     } else if(non === "Chat") {
-                        kontni = `<b style="color:#FACC15">${data.username}:</b> ${data.message}`;
+                        // MODIFIKASYON CHAT: Montre foto ak non jwè
+                        const userPic = data.photoUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+                        kontni = `
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <img src="${userPic}" class="chat-pic" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                                <div>
+                                    <b style="color:#FACC15; font-size:14px;">${data.username}:</b>
+                                    <div style="color:white; font-size:13px; margin-top:2px;">${data.message}</div>
+                                </div>
+                            </div>
+                        `;
                     } else {
                         kontni = `<div class="info">Done: ${JSON.stringify(data)}</div>`;
                     }
@@ -302,7 +318,13 @@
         window.voyeMesaj = function() {
             const msgInput = document.getElementById('msg');
             if(msgInput.value.trim() !== "") {
-                push(ref(db, 'chat'), { username: "ADMIN - PRIME", message: msgInput.value, timestamp: serverTimestamp() });
+                // Voye mesaj la ak non Admin ak yon foto Admin (si w genyen yonn)
+                push(ref(db, 'chat'), { 
+                    username: "ADMIN - PRIME", 
+                    message: msgInput.value, 
+                    photoUrl: "https://cdn-icons-png.flaticon.com/512/2206/2206368.png", // Icon Admin
+                    timestamp: serverTimestamp() 
+                });
                 msgInput.value = "";
             }
         }
