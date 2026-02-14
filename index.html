@@ -11,6 +11,7 @@
             --primary: #3B82F6;
             --accent: #10B981;
             --text: #F9FAFB;
+            --danger: #EF4444;
         }
 
         body { 
@@ -22,23 +23,24 @@
         }
 
         .header { 
-            padding: 25px; 
+            padding: 20px; 
             text-align: center; 
             background: #111827;
             border-bottom: 2px solid var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         
-        .header h1 { margin: 0; font-size: 20px; color: var(--primary); text-transform: uppercase; }
+        .header h1 { margin: 0; font-size: 18px; color: var(--primary); letter-spacing: 1px; }
 
         .nav-categories { 
             display: flex; 
             overflow-x: auto; 
-            padding: 15px; 
-            gap: 10px; 
-            background: #111827;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 12px; 
+            gap: 8px; 
+            background: #0B0E14;
+            border-bottom: 1px solid #30363D;
         }
 
         .nav-categories::-webkit-scrollbar { display: none; }
@@ -47,40 +49,47 @@
             background: var(--card-bg); 
             border: 1px solid #30363D; 
             color: #8B949E; 
-            padding: 10px 20px; 
-            border-radius: 8px; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
             cursor: pointer; 
             white-space: nowrap;
             font-weight: 600;
+            font-size: 13px;
         }
 
         .nav-categories button.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        #display-area { padding: 20px; max-width: 600px; margin: auto; }
-        .category-title { color: var(--primary); margin-bottom: 15px; font-weight: bold; }
+        #display-area { padding: 15px; max-width: 500px; margin: auto; }
+        .category-title { color: var(--primary); margin-bottom: 12px; font-weight: bold; font-size: 14px; text-transform: uppercase; }
 
         .card { 
             background: var(--card-bg); 
             padding: 15px; 
             margin-bottom: 12px; 
-            border-radius: 10px; 
+            border-radius: 12px; 
             border: 1px solid #30363D;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
-        .card b { color: var(--primary); display: block; margin-bottom: 5px; }
-        .card .info { font-size: 12px; color: #8B949E; margin-top: 5px; word-break: break-all; }
-        .card .amount { color: var(--accent); font-weight: bold; }
+        .card b { color: var(--primary); display: block; margin-bottom: 4px; font-size: 15px; }
+        .card .info { font-size: 11px; color: #8B949E; margin-top: 8px; word-break: break-all; font-family: monospace; }
+        .card .amount { color: var(--accent); font-weight: bold; font-size: 16px; }
 
-        /* Style pou Imaj Prèv yo */
+        .prev-img-container {
+            width: 100%;
+            margin-top: 12px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+
         .prev-img {
             width: 100%;
-            max-height: 300px;
+            display: block;
+            max-height: 450px;
             object-fit: contain;
-            border-radius: 8px;
-            margin-top: 10px;
-            background: #000;
-            border: 1px solid #30363D;
-            cursor: pointer;
+            cursor: zoom-in;
         }
 
         .chat-input { 
@@ -88,20 +97,20 @@
             bottom: 0; 
             width: 100%; 
             background: #161B22; 
-            padding: 15px; 
+            padding: 12px; 
             display: none; 
             box-sizing: border-box;
             border-top: 1px solid var(--primary);
         }
 
-        .chat-container { display: flex; gap: 10px; }
+        .chat-container { display: flex; gap: 8px; max-width: 500px; margin: auto; }
 
         input { 
             background: #0D1117; 
             border: 1px solid #30363D; 
             color: white; 
             padding: 10px; 
-            border-radius: 5px;
+            border-radius: 8px;
             flex-grow: 1;
             outline: none;
         }
@@ -111,14 +120,15 @@
             border: none; 
             color: white; 
             padding: 0 15px; 
-            border-radius: 5px; 
+            border-radius: 8px; 
             cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="header"><h1>PRIME GAMING HT</h1></div>
+    <div class="header"><h1>PRIME GAMING HT - ADMIN</h1></div>
 
     <div class="nav-categories" id="navBar">
         <button onclick="chajKategori('admin_requests/deposits', 'Depo', this)">Depo</button>
@@ -131,12 +141,12 @@
     </div>
 
     <div id="display-area">
-        <div style="text-align:center; margin-top: 50px; color: #8B949E;">Chwazi yon kategori pou kontwole...</div>
+        <div style="text-align:center; margin-top: 50px; color: #8B949E;">Chwazi yon kategori pou kòmanse...</div>
     </div>
 
     <div id="chat-box" class="chat-input">
         <div class="chat-container">
-            <input type="text" id="msg" placeholder="Ekri kòm PRIME GAMING HT...">
+            <input type="text" id="msg" placeholder="Mesaj piblik...">
             <button class="btn-send" onclick="voyeMesaj()">Voye</button>
         </div>
     </div>
@@ -166,14 +176,14 @@
             const chatBox = document.getElementById('chat-box');
             chatBox.style.display = (non === 'Chat') ? 'block' : 'none';
             
-            area.innerHTML = `<div class="category-title">Kategori: ${non}...</div>`;
+            area.innerHTML = `<div class="category-title">Kategori: ${non}</div><div style="text-align:center; padding:20px;">Ap chaje...</div>`;
 
             const dbRef = ref(db, path);
             onValue(dbRef, (snapshot) => {
                 area.innerHTML = `<div class="category-title">Kategori: ${non}</div>`;
                 
                 if (!snapshot.exists()) {
-                    area.innerHTML += `<div style="text-align:center; padding:20px; color:#8B949E;">Pa gen done pou kounye a.</div>`;
+                    area.innerHTML += `<div style="text-align:center; padding:20px; color:#8B949E;">Pa gen done kounye a.</div>`;
                     return;
                 }
 
@@ -181,31 +191,37 @@
                     const data = child.val();
                     let kontni = "";
                     
-                    if(non === "Chat") {
-                        const styleAdmin = data.username === "PRIME GAMING HT" ? "style='color:#FACC15; font-weight:bold;'" : "";
-                        kontni = `<span ${styleAdmin}>${data.username || 'Inonim'}:</span> ${data.message || ''}`;
+                    if(non === "Prèv Match") {
+                        // NOU ITILIZE 'proof_img' JAN SA YE NAN FIREBASE OU AN
+                        const img = data.proof_img || data.image_url || data.screenshot;
+                        const imgHtml = img ? `<div class="prev-img-container"><img src="${img}" class="prev-img" onclick="window.open('${img}', '_blank')"></div>` : `<div style="color:gray; padding:10px;">Pa gen foto</div>`;
+                        
+                        kontni = `<b>📸 Rezilta Match</b>
+                                  Itilizatè: ${data.username || 'Kelly'}<br>
+                                  Match: ${data.match_id || 'N/A'}<br>
+                                  Status: <span style="color:#FACC15">${data.status || 'pending'}</span>
+                                  ${imgHtml}`;
                     } else if(non === "Users") {
-                        kontni = `<b>👤 ${data.username || 'Utilisatè'}</b>Balans: <span class="amount">${data.balance || 0} HTG</span><div class="info">UID: ${child.key}</div>`;
-                    } else if(non === "Prèv Match") {
-                        // Lojik pou detekte imaj la
-                        let imgHtml = "";
-                        if (data.image_url || data.screenshot || data.url) {
-                            const link = data.image_url || data.screenshot || data.url;
-                            imgHtml = `<img src="${link}" class="prev-img" onclick="window.open('${link}', '_blank')">`;
-                        }
-                        kontni = `<b>📸 Rezilta Match</b>Utilisatè: ${data.username || 'N/A'}<br>Match: ${data.match_id || 'N/A'}${imgHtml}<div class="info">ID: ${child.key}</div>`;
+                        kontni = `<b>👤 ${data.username || 'Itilizatè'}</b>Balans: <span class="amount">${data.balance || 0} HTG</span><div class="info">Email: ${data.email || 'N/A'}</div>`;
                     } else if(non === "Depo") {
-                        kontni = `<b>💵 Demann Depo</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount">${data.amount || 0} HTG</span><div class="info">ID: ${child.key}</div>`;
+                        kontni = `<b>💵 Demann Depo</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount">${data.amount || 0} HTG</span>`;
                     } else if(non === "Retrè") {
-                        kontni = `<b>💸 Demann Retrè</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount" style="color:#EF4444">${data.amount || 0} HTG</span><div class="info">ID: ${child.key}</div>`;
+                        kontni = `<b>💸 Demann Retrè</b>Utilisatè: ${data.username || 'N/A'}<br>Montan: <span class="amount" style="color:var(--danger)">${data.amount || 0} HTG</span>`;
+                    } else if(non === "Chat") {
+                        kontni = `<b style="color:#FACC15">${data.username}:</b> ${data.message}`;
                     } else {
-                        kontni = `<b>ID: ${child.key}</b><div class="info">${typeof data === 'object' ? JSON.stringify(data) : data}</div>`;
+                        // Pou tout lòt kategori yo, nou montre tout sa k anndan yo otomatikman
+                        let detay = "";
+                        for (let key in data) {
+                            detay += `<div><b>${key}:</b> ${data[key]}</div>`;
+                        }
+                        kontni = `<b>ID: ${child.key}</b><div class="info">${detay}</div>`;
                     }
 
-                    area.innerHTML += `<div class="card">${kontni}</div>`;
+                    area.innerHTML += `<div class="card">${kontni}<div class="info">ID: ${child.key}</div></div>`;
                 });
             }, (error) => {
-                area.innerHTML = `<div style="color:red; padding:20px;">Erè: ${error.message}</div>`;
+                area.innerHTML = `<div style="color:var(--danger); padding:20px;">Erè: ${error.message}</div>`;
             });
         }
 
@@ -215,7 +231,7 @@
                 const chatRef = ref(db, 'chat');
                 const nouvoMsg = push(chatRef);
                 set(nouvoMsg, {
-                    username: "PRIME GAMING HT",
+                    username: "ADMIN - PRIME",
                     message: msgInput.value,
                     timestamp: serverTimestamp()
                 });
