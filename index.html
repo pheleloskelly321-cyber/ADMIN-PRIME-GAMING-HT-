@@ -2,51 +2,165 @@
 <html lang="ht">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prime Gaming HT - Kontwòl</title>
     <style>
-        body { background: #0B0E14; color: white; font-family: sans-serif; margin: 0; }
-        .header { padding: 20px; text-align: center; color: #3B82F6; border-bottom: 1px solid #1F2937; }
-        .nav-categories { display: flex; overflow-x: auto; padding: 10px; gap: 10px; background: #111827; }
-        .nav-categories button { 
-            background: #1F2937; border: none; color: white; padding: 10px 20px; 
-            border-radius: 5px; cursor: pointer; white-space: nowrap;
+        :root {
+            --bg: #0B0E14;
+            --card-bg: #161B22;
+            --primary: #3B82F6;
+            --accent: #10B981;
+            --text: #F9FAFB;
         }
-        .nav-categories button.active { background: #3B82F6; }
-        #display-area { padding: 15px; }
-        .card { background: #1F2937; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #3B82F6; }
-        .chat-input { position: fixed; bottom: 0; width: 100%; background: #1F2937; padding: 10px; display: none; }
-        input { background: #0B0E14; border: 1px solid #3B82F6; color: white; padding: 8px; width: 70%; }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding-bottom: 80px; /* Pou espas chat la */
+        }
+
+        /* UI Header */
+        .header { 
+            padding: 25px; 
+            text-align: center; 
+            background: linear-gradient(180deg, #111827 0%, #0B0E14 100%);
+            border-bottom: 2px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        
+        .header h1 { margin: 0; font-size: 22px; letter-spacing: 2px; color: var(--primary); }
+
+        /* Navigation bèl */
+        .nav-categories { 
+            display: flex; 
+            overflow-x: auto; 
+            padding: 15px; 
+            gap: 12px; 
+            background: #111827;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-categories::-webkit-scrollbar { display: none; }
+
+        .nav-categories button { 
+            background: var(--card-bg); 
+            border: 1px solid #30363D; 
+            color: #8B949E; 
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            white-space: nowrap;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .nav-categories button:hover { border-color: var(--primary); color: white; }
+        .nav-categories button.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+
+        /* Display Area */
+        #display-area { padding: 20px; max-width: 800px; margin: auto; }
+        .category-title { color: var(--primary); margin-bottom: 20px; font-size: 18px; border-left: 4px solid var(--primary); padding-left: 10px; }
+
+        /* Cards Style Pro */
+        .card { 
+            background: var(--card-bg); 
+            padding: 18px; 
+            margin-bottom: 15px; 
+            border-radius: 15px; 
+            border: 1px solid #30363D;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card b { color: var(--primary); display: block; margin-bottom: 5px; }
+        .card .info { font-size: 13px; color: #8B949E; margin-top: 8px; font-family: monospace; }
+        .card .amount { color: var(--accent); font-weight: bold; font-size: 16px; }
+
+        /* Chat Input Style */
+        .chat-input { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: #161B22; 
+            padding: 15px; 
+            display: none; 
+            box-sizing: border-box;
+            border-top: 1px solid var(--primary);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.4);
+        }
+
+        .chat-container { display: flex; gap: 10px; max-width: 800px; margin: auto; }
+
+        input { 
+            background: #0D1117; 
+            border: 1px solid #30363D; 
+            color: white; 
+            padding: 12px; 
+            border-radius: 10px;
+            flex-grow: 1;
+            outline: none;
+        }
+        
+        input:focus { border-color: var(--primary); }
+
+        .btn-send { 
+            background: var(--primary); 
+            border: none; 
+            color: white; 
+            padding: 0 20px; 
+            border-radius: 10px; 
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <div class="header"><h1>PRIME GAMING HT</h1></div>
 
-    <div class="nav-categories">
-        <button onclick="chajKategori('admin_requests/deposits', 'Depo')">Depo</button>
-        <button onclick="chajKategori('admin_requests/withdrawals', 'Retrè')">Retrè</button>
-        <button onclick="chajKategori('challenges', 'Defi Lage')">Defi Lage</button>
-        <button onclick="chajKategori('admin_controls/accepted_challenges', 'Defi Asepte')">Defi Asepte</button>
-        <button onclick="chajKategori('users', 'Itilizatè')">Users</button>
-        <button onclick="chajKategori('chat', 'Chat')">Chat</button>
+    <div class="nav-categories" id="navBar">
+        <button onclick="chajKategori('admin_requests/deposits', 'Depo', this)">Depo</button>
+        <button onclick="chajKategori('admin_requests/withdrawals', 'Retrè', this)">Retrè</button>
+        <button onclick="chajKategori('challenges', 'Defi Lage', this)">Defi Lage</button>
+        <button onclick="chajKategori('admin_controls/accepted_challenges', 'Defi Asepte', this)">Defi Asepte</button>
+        <button onclick="chajKategori('admin_requests/match_results', 'Prèv Match', this)">Prèv Match</button>
+        <button onclick="chajKategori('users', 'Users', this)">Users</button>
+        <button onclick="chajKategori('chat', 'Chat', this)">Chat</button>
     </div>
 
-    <div id="display-area">Chwazi yon kategori pou kòmanse...</div>
+    <div id="display-area">
+        <div style="text-align:center; margin-top: 50px; color: #8B949E;">Chwazi yon kategori pou kontwole...</div>
+    </div>
 
     <div id="chat-box" class="chat-input">
-        <input type="text" id="msg" placeholder="Ekri kòm PRIME GAMING HT...">
-        <button onclick="voyeMesaj()">Voye</button>
+        <div class="chat-container">
+            <input type="text" id="msg" placeholder="Ekri kòm PRIME GAMING HT...">
+            <button class="btn-send" onclick="voyeMesaj()">Voye</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = { /* KONFIGIRASYON OU */ };
+        const firebaseConfig = {
+            // METE DONE PAW YO LA
+            databaseURL: "https://prime-gaming-ht-default-rtdb.firebaseio.com",
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        window.chajKategori = function(path, non) {
+        window.chajKategori = function(path, non, btn) {
+            // Aktive koulè bouton
+            document.querySelectorAll('.nav-categories button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
             const area = document.getElementById('display-area');
             const chatBox = document.getElementById('chat-box');
             
@@ -54,17 +168,28 @@
             
             const dbRef = ref(db, path);
             onValue(dbRef, (snapshot) => {
-                area.innerHTML = `<h3>Kategori: ${non}</h3>`;
+                area.innerHTML = `<div class="category-title">Kategori: ${non}</div>`;
+                
+                if (!snapshot.exists()) {
+                    area.innerHTML += `<div style="text-align:center; padding:20px; color:#8B949E;">Pa gen done nan seksyon sa a.</div>`;
+                    return;
+                }
+
                 snapshot.forEach((child) => {
                     const data = child.val();
                     let kontni = "";
                     
                     if(non === "Chat") {
-                        kontni = `<b>${data.username}:</b> ${data.message}`;
+                        const styleAdmin = data.username === "PRIME GAMING HT" ? "style='color:#FACC15; font-weight:bold;'" : "";
+                        kontni = `<span ${styleAdmin}>${data.username}:</span> ${data.message}`;
                     } else if(non === "Users") {
-                        kontni = `👤 ${data.username} | 💰 ${data.balance} HTG`;
+                        kontni = `<b>👤 ${data.username || 'Inonim'}</b><span class="amount">💰 ${data.balance || 0} HTG</span><div class="info">ID: ${child.key}</div>`;
+                    } else if(non === "Depo") {
+                        kontni = `<b>💵 Nouvo Depo</b>Utilisatè: ${data.username}<br><span class="amount">+ ${data.amount} HTG</span><div class="info">Trans: ${data.transaction_id || child.key}</div>`;
+                    } else if(non === "Retrè") {
+                        kontni = `<b>💸 Demann Retrè</b>Utilisatè: ${data.username}<br><span class="amount" style="color:#EF4444">- ${data.amount} HTG</span><div class="info">Metòd: ${data.method || 'N/A'}</div>`;
                     } else {
-                        kontni = `ID: ${child.key} <br> ${JSON.stringify(data)}`;
+                        kontni = `<b>Aktivite: ${child.key}</b><div class="info">${JSON.stringify(data)}</div>`;
                     }
 
                     area.innerHTML += `<div class="card">${kontni}</div>`;
@@ -74,13 +199,13 @@
 
         window.voyeMesaj = function() {
             const msgInput = document.getElementById('msg');
-            if(msgInput.value !== "") {
+            if(msgInput.value.trim() !== "") {
                 const chatRef = ref(db, 'chat');
                 const nouvoMsg = push(chatRef);
                 set(nouvoMsg, {
                     username: "PRIME GAMING HT",
                     message: msgInput.value,
-                    timestamp: Date.now()
+                    timestamp: serverTimestamp()
                 });
                 msgInput.value = "";
             }
